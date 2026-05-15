@@ -1,5 +1,5 @@
 retrieval:
   index_ticker: "^BVSP"
-  constituent_ticker: "VALE3.SA"
+  constituent_ticker: "ITUB4.SA"
   start_date: "1993-01-01"
   end_date: "today"
