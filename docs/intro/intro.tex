@@ -1,0 +1,976 @@
+\documentclass[12pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{setspace}
+\usepackage{natbib}
+\usepackage{hyperref}
+\usepackage{booktabs}
+\usepackage{graphicx}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=black,
+    citecolor=black,
+    urlcolor=black
+}
+
+\onehalfspacing
+
+\title{\textbf{Time--Frequency Methods in Index Tracking}}
+
+\begin{document}
+
+\maketitle
+
+% \begin{abstract}
+% The financial econometrics literature has long debated whether correlation
+% or cointegration provides the more appropriate foundation for index
+% tracking and portfolio replication. We argue that this debate is
+% incompletely framed: correlation and cointegration are not competing
+% paradigms but limiting cases of a richer spectral structure. By
+% recasting the tracking problem in the frequency domain we show that
+% cointegration corresponds to a very low-pass constraint on the price
+% spread, that correlation-based optimisation targets high-frequency return
+% dynamics, and that the two are connected by a continuum parameterised by
+% the spectral content of the tracking error. Fractional integration sits
+% naturally within this picture, but the frequency-domain representation
+% is the cleaner and more practically useful framework, particularly when
+% investor horizon preferences are heterogeneous. Time-frequency methods
+% from signal processing then allow these preferences to be articulated
+% continuously and precisely, and we argue that coherence under coherent
+% risk measures is a natural desideratum in this setting. The present
+% document establishes the conceptual and mathematical foundations for
+% this programme.
+% \end{abstract}
+
+% \newpage
+% \tableofcontents
+% \newpage
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Introduction}
+\label{sec:introduction}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Portfolio optimisation and index replication have long relied on the
+statistical relationship between asset prices, yet the financial
+econometrics literature has never reached a settled consensus on which
+measure of dependence is most appropriate for these tasks. Two candidates
+have dominated the debate: correlation, which quantifies the co-movement
+of asset returns over a fixed sample window, and cointegration, which
+identifies the existence of a common stochastic trend in the price levels
+of two or more integrated series. Though both concepts are grounded in
+the same probabilistic foundations, they capture fundamentally different
+aspects of dependence, and the choice between them has non-trivial
+consequences for portfolio construction, risk management, and trading
+strategy design.
+
+This paper argues that the debate has been incompletely framed. Flip
+flops and mountaineering boots are both footwear. Neither is wrong.
+The difficulty arises when one attempts to declare a universal winner
+across all terrains: the question of which is better has no answer
+until the terrain is specified. The correlation versus cointegration
+literature has largely proceeded as though the terrain were fixed,
+seeking to settle which approach is superior without first asking
+what the investor's horizon actually requires.
+
+The resolution lies in frequency analysis. Correlation and cointegration
+are not competing methods but limiting cases of a single family of
+tracking criteria, each targeting a different part of the frequency
+spectrum of the portfolio-benchmark spread. This becomes precise through
+the frequency response of the differencing operator: working in returns
+concentrates the tracking objective on fluctuations at timescales of
+days, while working in price levels concentrates it on fluctuations at
+timescales of years. Neither is universally better. Each is well suited
+to a specific investor horizon and poorly suited to all others.
+
+Fractional integration provides a natural interpolation between these two
+extremes, with each value of the fractional differencing parameter $d$
+corresponding to a concrete intermediate horizon. But the fractional
+family is itself limited: it can only produce monotone frequency
+responses, and real investor preferences are not always monotone. A
+general frequency response relaxes this restriction entirely, allowing
+the tracking criterion to be shaped to any horizon profile. The result
+is a framework in which investor time horizon preference is a design
+parameter, expressible quantitatively and continuously, rather than a
+binary choice between two inherited methodologies. The present work
+proposes such a framework, grounded in time-frequency representations
+of the price process. This is extended to linear risk-coherent
+optimisation programmes \citep{ArtznerDelbaenEberHeath1999} for both index tracking and enhanced index
+tracking, and portfolio sparsity is enforced through the $\ell_0$-norm
+approximation procedure of \citet{BenidisFengPalomar2018}.
+
+\subsection{The Correlation Paradigm and Its Limitations}
+
+The correlation-based paradigm has its roots in the mean-variance
+framework of \citet{Markowitz1959} and was formalised for index tracking
+by \citet{Roll1992}, whose tracking error variance minimisation model
+remains the practitioner standard. The appeal of correlation is its
+familiarity and computational tractability: given a sample of returns, a
+covariance matrix can be estimated and an optimal portfolio derived in
+closed form. The limitation, however, is equally well understood.
+Correlation is computed from return series, which are stationary by
+construction, and therefore captures only short-run co-movements.
+\citet{Alexander1999} observed that correlation is intrinsically a
+short-run measure and that tracking portfolios built on it carry no
+guarantee that the price spread between the replica and the benchmark
+will remain bounded over time. For daily data, this short-run character
+is pronounced: the tracking objective is primarily sensitive to
+fluctuations at horizons of days to weeks, and is essentially blind to
+slower-moving divergences between the portfolio and the benchmark. This
+is not an empirical accident but a mathematical consequence of working
+with return series, which are first differences of prices: differencing
+acts as a high-pass filter, suppressing low-frequency trends and
+retaining only rapid fluctuations \citep{ChaudhuriLo2016,EngleGranger1974}.
+Section~\ref{sec:frequency_analysis}
+makes this precise and quantifies the effective horizon of
+correlation-based tracking. In the absence of a mean-reversion
+mechanism, the tracking error may behave as a random walk, drifting
+arbitrarily far from zero and necessitating frequent and costly
+rebalancing. This observation, which has since been reproduced in
+numerous empirical settings, motivates the cointegration alternative.
+
+\subsection{The Cointegration Framework}
+
+The cointegration framework, introduced by \citet{Granger1981} and
+\citet{EngleGranger1987} and later extended by \citet{Johansen1988,
+Johansen1991}, addresses the deficiency of correlation by working
+directly with price levels. Two or more $I(1)$ series are said to be
+cointegrated if a stationary linear combination of them exists. In the
+index tracking context this is a natural property: because a market index
+is itself a linear combination of its constituent prices, there must in
+principle exist a portfolio whose value tracks the index with a
+stationary, mean-reverting error. \citet{Alexander1999} formalised this
+insight and showed that a cointegration-optimal portfolio guarantees
+stationarity of the tracking error by construction, ties the portfolio to
+its benchmark in the long run, and produces more stable portfolio weights
+because they are estimated from price levels over a long calibration
+window. For daily data, calibration windows of three to five years are
+standard, and the method is largely insensitive to fluctuations at
+horizons shorter than a year. This long-run character is the structural
+counterpart to correlation's short-run sensitivity: working in price
+levels, which are the cumulative sum of returns, acts as a low-pass
+filter, suppressing rapid fluctuations and retaining only slow-moving
+common trends \citep{ChaudhuriLo2016}. Section~\ref{sec:frequency_analysis} quantifies this
+precisely. A direct consequence is that cointegration-based portfolios
+require less frequent rebalancing than their correlation-based
+counterparts, not as a practical convenience but because the objective
+itself is insensitive to the short-run deviations that would otherwise
+trigger rebalancing.
+
+These theoretical properties were subsequently developed into explicit
+trading strategies by \citet{AlexanderGiblinWeddington2002} and
+\citet{AlexanderDimitriu2002, AlexanderDimitriu2005a,
+AlexanderDimitriu2005b}, who demonstrated that cointegration-based
+long-short equity strategies can achieve low volatility, near
+market-neutrality, and favourable Sharpe ratios across multiple market
+regimes. The error correction model that underpins cointegration reveals
+causal flows, sometimes called Granger causalities, that must exist
+between series sharing a common stochastic trend \citep{Granger1988}, and
+this dynamic structure is itself a source of useful information for
+portfolio management and risk control.
+
+\subsection{An Open and Inconclusive Empirical Debate}
+\label{sec:litreview}
+
+\subsubsection{Evidence from the Literature}
+
+The empirical evidence, however, is considerably less clear-cut than the
+theoretical arguments would suggest. \citet{AlexanderDimitriu2005a}, in
+what remains the most rigorous direct comparison, found that for simple
+index tracking using Dow Jones Industrial Average constituents the
+out-of-sample performance of cointegration-optimal portfolios was broadly
+similar to that of tracking error variance minimisation, with neither
+method exhibiting a decisive advantage once the number of stocks was
+sufficient. \citet{Grobys2010}, applying the same comparison to the
+Swedish OMX market over a ten-year period, reached the opposite
+conclusion, finding that cointegration-based portfolios clearly dominated
+on both Sharpe and Treynor ratios, with the best portfolio outperforming
+the index by a substantial margin at lower volatility. \citet{SantAnna2016},
+who made portfolio selection endogenous to the cointegration optimisation
+through large-scale simulation across Brazilian and United States data,
+found again that neither method consistently dominates: cointegration
+delivered better tracking error for Brazilian equities while correlation
+was superior on turnover and volatility, and results for the United
+States market were mixed.
+
+In a different application of the same two building blocks,
+\citet{Miao2014} proposed a two-stage procedure in which correlation
+filters candidate pairs and cointegration provides the final selection
+criterion for high-frequency statistical arbitrage, reporting strong
+out-of-sample performance on energy sector stocks. The combination of
+the two stages is telling: it suggests that each measure captures
+something the other misses, and that a unified treatment would be
+preferable to sequential filtering. \citet{Arsov2023}, examining small
+South-East European markets, found that although Johansen tests
+initially indicated cointegration, the result could not be validated
+diagnostically, and the analysis reverted to vector autoregressive and
+GARCH frameworks. The broader literature on emerging market integration
+and volatility spillovers similarly finds that the presence or absence
+of cointegration is sensitive to market structure, data frequency, and
+sample length, with no universal verdict.
+
+Beyond the index tracking literature, similar ambiguity appears in
+studies of international market linkages. A recurring finding is that
+developed markets transmit both return and volatility shocks to smaller
+markets through mechanisms that operate at multiple time scales
+simultaneously \citep{Arsov2023, AlexanderDimitriu2005b}. These
+multi-scale transmission patterns cannot be adequately characterised by
+either correlation, which aggregates across all frequencies, or
+cointegration, which focuses exclusively on the lowest.
+
+\subsubsection{A Question of Investor Horizon}
+
+The inconclusiveness of this literature is less surprising once the
+horizon argument is taken seriously. The studies above largely evaluate
+both methods against the same short-run tracking error metrics,
+regardless of the horizon the method was designed for. This is precisely
+where the terrain matters. Asking which method is better without
+specifying the investor's horizon is not a well-posed question.
+
+Consider two investors. The first is a portfolio manager running a
+short-term equity overlay, rebalancing weekly to maintain index exposure
+for hedging purposes. Daily and weekly deviations from the benchmark
+directly affect the hedge's effectiveness and need to be kept small.
+Multi-year drift is irrelevant: positions are rarely held beyond a few
+months. For this investor, correlation-based tracking is the natural
+choice. The tracking objective is sensitive to exactly the fluctuations
+that matter, and frequent rebalancing is not a cost to be minimised but
+a feature of the strategy.
+
+The second is an asset manager running the equity sleeve of a defined
+benefit pension fund, matching assets to liabilities that extend twenty
+years into the future. Whether the portfolio was 0.3\% away from the
+benchmark on any given Tuesday is of no consequence. What matters is
+that when liabilities fall due, the portfolio value is close to the
+benchmark value. Rebalancing costs compound over decades, so stability
+of weights is a primary concern. For this investor, cointegration-based
+tracking is the natural choice. The long-run adherence it guarantees is
+exactly what the liability-matching mandate requires, and the lower
+turnover is a direct benefit.
+
+Neither investor is wrong about their method. They are simply operating
+at different points on the frequency spectrum of the tracking error.
+The empirical debate, by evaluating both methods on a common metric
+without regard to horizon, has been asking which of the two serves both
+investors simultaneously, and correctly finding that neither does so
+consistently.
+
+This reframing points naturally toward an intermediate territory. A
+quarterly-reporting fund, a retail investor with a five-year savings
+horizon, or a risk-parity manager rebalancing monthly all sit between
+these two extremes and are served by neither method in its pure form.
+The theory of fractional integration, introduced by
+\citet{GrangerJoyeux1980} and \citet{Hosking1981}, provides a
+continuous interpolation. By allowing the order of differencing $d$ to
+take non-integer values between zero and one, it produces tracking
+criteria whose effective horizon varies continuously from days to years
+as $d$ decreases from one toward zero. Correlation corresponds to
+$d = 1$; cointegration corresponds to $d \approx 0$; and every
+investment horizon in between corresponds to some intermediate value.
+Section~\ref{sec:fractional_integration} develops this connection
+formally, and Section~\ref{sec:frequency_analysis} makes the horizon
+mapping precise.
+
+\subsection{A False Dichotomy}
+
+What emerges from this body of work is not a resolved debate but an
+incompletely specified one. The studies reviewed above have largely asked
+which method is better, without first specifying better for whom and over
+what horizon. As the two investor examples in the previous section
+illustrate, this question has no horizon-independent answer: correlation
+is the correct tool for the equity overlay manager hedging weekly
+exposures, and cointegration is the correct tool for the pension fund
+matching twenty-year liabilities. Evaluated on the same short-run
+tracking error metric, cointegration will appear inferior. Evaluated on
+long-run price-level adherence, correlation will appear inferior. Neither
+conclusion is informative about the methods themselves; both reflect the
+mismatch between the evaluation criterion and the method's intended
+horizon. This is the primary source of the inconclusiveness documented
+in Section~\ref{sec:litreview}.
+
+Beyond this misspecification, the discussion has also proceeded in binary
+terms: a portfolio is either built on correlation or on cointegration,
+the tracking error is either stationary or it is not, and the analyst
+either differences the data or regresses in levels. Consider a third
+investor: a target-date retirement fund manager with a ten-year horizon,
+rebalancing quarterly and reporting annual performance to clients. Daily
+noise is irrelevant to this investor, but so is the exclusive focus on
+decade-scale price-level adherence that cointegration enforces. This
+investor sits squarely between the two extremes, and the binary framing
+offers no natural home for them. The dichotomy is therefore a second and
+separate limitation, compounding the primary one.
+
+Correlation and cointegration are not competing definitions of dependence
+so much as limiting cases of a richer structure. Correlation, by
+operating on returns, is sensitive to high-frequency co-movements while
+being blind to low-frequency common trends. Cointegration, by identifying
+stochastic trends in price levels, is precisely a statement about the
+very lowest frequencies of the data generating process: the near-zero
+portion of the spectrum where power accumulates without bound in an
+integrated series. The two approaches are therefore not in opposition;
+they are each sampling a different part of the spectral content of the
+multivariate price process.
+
+This observation connects naturally to the theory of fractional
+integration. A series that is $I(0)$ is stationary and its spectral
+density is bounded and flat at the origin. A series that is $I(1)$ has a
+spectral density that diverges at zero frequency, reflecting the
+accumulation of permanent shocks. Fractional integration, in the sense
+of \citet{GrangerJoyeux1980} and \citet{Hosking1981}, allows the order
+of integration to take non-integer values between zero and one, producing
+series whose spectral density diverges at the origin at a rate that
+interpolates continuously between the stationary and the unit-root cases.
+From this perspective, the correlation-versus-cointegration debate is a
+debate about whether the tracking error lives at $d = 0$ or at some
+positive fractional value approaching unity, and the practitioner's
+choice of optimisation method implicitly encodes an assumption about
+which frequency bands are relevant to the investment horizon in question.
+Section~\ref{sec:fractional_integration} makes this mapping precise,
+providing a concrete correspondence between values of $d$ and investment
+horizons in trading days.
+
+The fractional differencing family, however, imposes a fundamental
+restriction: its frequency responses are necessarily monotone. For any
+value of $d$, the resulting filter either up-weights low frequencies or
+high frequencies, and cannot selectively target an intermediate band.
+An investor whose mandate is defined at a specific horizon, such as a
+quarterly-reporting fund that is indifferent to both daily noise and
+multi-year drift, cannot express this preference through any choice of
+$d$. The generalisation to arbitrary frequency responses, developed in
+Section~\ref{sec:general_freq}, removes this restriction
+entirely.
+
+\subsection{Structure of the Paper}
+\label{sec:structure}
+
+The remainder of this paper is organised as follows.
+Section~\ref{sec:foundations} establishes the mathematical foundations
+required for the analysis. It introduces fractional differentiation and
+its relationship to long-memory processes
+(Section~\ref{sec:fractional_integration}), presents the discrete
+Fourier transform and the frequency response as analytical tools
+(Section~\ref{sec:fourier}), and motivates the move to time-frequency
+representations (Section~\ref{sec:tfr}). It then sets out the index
+tracking and enhanced index tracking optimisation problems
+(Section~\ref{sec:it_formulation}), reviews coherent risk measures and
+their linear programme formulations (Section~\ref{sec:risk_measures}),
+and introduces sparse index tracking (Section~\ref{sec:sparsity}).
+
+Section~\ref{sec:freq_tracking} develops the core argument
+quantitatively, mirroring the narrative of Section~\ref{sec:introduction}
+with precise derivations. It derives the frequency responses of the
+differencing and integration operators and connects them to concrete
+investor horizons via the standard signal processing half-power cutoff
+(Sections~\ref{sec:corr_response} and~\ref{sec:coint_response}). It
+then derives the fractional differencing family and maps each value of
+$d$ to a trading-day horizon (Section~\ref{sec:frac_response}). It
+demonstrates that passband representations allow more precise horizon
+targeting than the monotone fractional family permits
+(Section~\ref{sec:passband}), and argues that the non-stationarity of
+financial returns necessitates time-frequency rather than purely
+Fourier-based analysis (Section~\ref{sec:stationarity}).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Foundations}
+\label{sec:foundations}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{Fractional Differentiation}
+\label{sec:fractional_integration}
+
+The distinction between the correlation and cointegration paradigms rests
+on whether one works with returns or with prices, that is, on whether the
+price series is differenced once or not at all. This is a binary choice
+between two integer orders of differencing. Fractional differentiation
+generalises the differencing operation to non-integer orders, and in
+doing so replaces the binary choice with a continuous one.
+
+It is convenient to express differencing through the lag operator $L$,
+defined by its action of shifting a series one step into the past,
+\begin{equation}
+    L x_t = x_{t-1}, \qquad L^k x_t = x_{t-k}.
+\end{equation}
+The first difference of a series, the change from one period to the next,
+is then
+\begin{equation}
+    \Delta x_t = x_t - x_{t-1} = (1 - L) x_t,
+\end{equation}
+so that the operation of differencing is represented by the operator
+$(1 - L)$. Differencing $d$ times corresponds to applying this operator
+$d$ times, that is, to raising it to the power $d$.
+
+Because $(1-L)^d$ is a binomial raised to a power, it expands according to
+the binomial theorem,
+\begin{equation}
+    (1 - L)^d = \sum_{k=0}^{d} \binom{d}{k} (-L)^k,
+\end{equation}
+where the coefficients $\binom{d}{k}$ are the familiar binomial
+coefficients. For $d = 2$, for example, the expansion yields $(1-L)^2 = 1
+- 2L + L^2$, so that $(1-L)^2 x_t = x_t - 2x_{t-1} + x_{t-2}$. For any
+positive integer $d$ the sum terminates at $k = d$, since the binomial
+coefficients vanish beyond that point, and differencing therefore
+involves only a finite number of past observations.
+
+The binomial coefficient is conventionally defined through factorials,
+\begin{equation}
+    \binom{d}{k} = \frac{d!}{k!\,(d-k)!}.
+\end{equation}
+This definition restricts $d$ to non-negative integers, since the
+factorial is defined only for such values. To admit non-integer orders of
+differencing, a generalisation of the factorial to arbitrary real
+arguments is required.
+
+Such a generalisation is provided by the gamma function, introduced by
+\citet{Euler1738}, which extends the factorial to the real and complex
+numbers while preserving its defining property,
+\begin{equation}
+    \Gamma(n + 1) = n! \quad \text{for non-negative integers } n,
+\end{equation}
+and remaining well defined for non-integer arguments. Substituting the
+gamma function for the factorials in the binomial coefficient gives
+\begin{equation}
+    \binom{d}{k} = \frac{\Gamma(d + 1)}{\Gamma(k + 1)\,\Gamma(d - k + 1)},
+\end{equation}
+an expression that coincides with the ordinary binomial coefficient when
+$d$ is an integer but remains meaningful for any real $d$.
+
+With the binomial coefficient defined for arbitrary real orders, the
+difference operator extends directly to non-integer $d$. Following
+\citet{GrangerJoyeux1980} and \citet{Hosking1981}, the fractional
+difference operator of order $d$ is defined by the series
+\begin{equation}
+    (1 - L)^d = \sum_{k=0}^{\infty} \binom{d}{k} (-L)^k
+    = \sum_{k=0}^{\infty}
+    \frac{\Gamma(d + 1)}{\Gamma(k + 1)\,\Gamma(d - k + 1)} (-1)^k L^k.
+\end{equation}
+Unlike the integer case, the series no longer terminates: for non-integer
+$d$ the coefficients are never exactly zero, and the operator depends on
+the entire past of the series. Applied to a series, fractional
+differentiation is thus a weighted sum of all preceding values,
+\begin{equation}
+    (1 - L)^d x_t = x_t - d\, x_{t-1}
+    + \frac{d(d-1)}{2}\, x_{t-2} - \cdots,
+\end{equation}
+with weights determined by the generalised binomial coefficients.
+
+The dependence on the entire history raises a question of practical
+computability, since only a finite sample is ever available. The weights,
+however, decay as $k$ increases, so the operator can be approximated to
+arbitrary accuracy by truncating the series at a finite number of lags.
+
+Figure~\ref{fig:fracdiff_sp500} illustrates the effect of the operator on
+the S\&P 500 price series for several orders of differencing. At $d = 0$
+the series is the raw price level; at $d = 1$ it is the ordinary return
+series, stationary and dominated by short-term fluctuation. The
+intermediate orders $d = 0.25$ and $d = 0.75$ produce series that retain
+progressively less of the slow-moving trend as $d$ increases, tracing a
+continuous path between the two integer extremes.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=\textwidth]{figures/fracdiff_sp500.pdf}
+\caption{The S\&P 500 price series under fractional differencing of
+orders $d = 0$ (the raw price level), $d = 0.25$, $d = 0.75$, and $d = 1$
+(ordinary returns). As $d$ increases from zero to one, the slow-moving
+trend is progressively removed and the series becomes increasingly
+dominated by short-term fluctuation.}
+\label{fig:fracdiff_sp500}
+\end{figure}
+
+\subsection{Fourier Analysis and Frequency Responses}
+\label{sec:fourier}
+
+\subsubsection{The Discrete Fourier Transform}
+\label{sec:dft}
+
+Let $x_0, x_1, \ldots, x_{T-1}$ be a finite sequence of real-valued
+observations, for instance the daily returns of an asset over $T$ trading
+days. The discrete Fourier transform re-expresses this sequence as a
+combination of complex exponentials, each oscillating at a distinct
+frequency. The transform is defined by
+\begin{equation}
+    X_k = \sum_{t=0}^{T-1} x_t \, e^{-j 2\pi k t / T},
+    \qquad k = 0, 1, \ldots, T-1,
+\end{equation}
+where $j = \sqrt{-1}$ and each index $k$ corresponds to the angular
+frequency $\omega_k = 2\pi k / T$ in radians per sample. The coefficient
+$X_k$ is a complex number whose magnitude $|X_k|$ measures the amplitude
+of the oscillation at frequency $\omega_k$ and whose argument $\angle X_k$
+measures its phase, that is, the position of the oscillation relative to
+the start of the sample. A large $|X_k|$ indicates that a cyclical
+component with period $T/k$ samples accounts for a substantial part of
+the variation in the series.
+
+The original sequence is recovered without loss through the inverse
+transform,
+\begin{equation}
+    x_t = \frac{1}{T} \sum_{k=0}^{T-1} X_k \, e^{j 2\pi k t / T},
+    \qquad t = 0, 1, \ldots, T-1.
+\end{equation}
+Writing the complex exponential through Euler's identity, $e^{j\theta} =
+\cos\theta + j\sin\theta$, and using the conjugate symmetry $X_{T-k} =
+\overline{X_k}$ that holds because the input is real-valued, the inverse
+transform can be expressed entirely in terms of real trigonometric
+functions,
+\begin{equation}
+    x_t = \frac{1}{T} \sum_{k=0}^{T-1}
+    \Big( \Re[X_k]\cos\tfrac{2\pi k t}{T}
+    - \Im[X_k]\sin\tfrac{2\pi k t}{T} \Big),
+\end{equation}
+or equivalently, collecting the magnitude and phase of each coefficient,
+as
+\begin{equation}
+    x_t = \frac{1}{T} \sum_{k=0}^{T-1}
+    |X_k| \cos\!\Big( \tfrac{2\pi k t}{T} + \angle X_k \Big).
+\end{equation}
+This last form makes the interpretation explicit: the series is a sum of
+cosine waves, one for each frequency $\omega_k$, with amplitude
+$|X_k|/T$ and phase offset $\angle X_k$. The decomposition is exact
+rather than approximate, so no information is lost in moving between the
+time representation $\{x_t\}$ and the frequency representation $\{X_k\}$.
+The lowest non-zero frequency, $k = 1$, corresponds to a single cycle
+spanning the entire sample of $T$ observations, while the highest, $k =
+\lfloor T/2 \rfloor$, corresponds to an oscillation that alternates at
+nearly every observation.
+
+\subsubsection{The Power Spectrum and the Decomposition of Variance}
+\label{sec:power_spectrum}
+
+The Fourier coefficients also reveal how the variability of a series is
+distributed across timescales. The link is a classical result known as
+Parseval's theorem, which states that the total energy of a signal is the
+same whether measured in the time domain or the frequency domain. For a
+zero-mean series this energy is exactly the sample variance, and the
+theorem takes the form
+\begin{equation}
+    \operatorname{var}(x_t) = \frac{1}{T} \sum_{t=0}^{T-1} x_t^2
+    = \frac{1}{T^2} \sum_{k=1}^{T-1} |X_k|^2.
+\end{equation}
+The practical content of this identity is that the variance of the series
+can be split into separate, additive contributions, one from each
+frequency. Define the periodogram
+\begin{equation}
+    \hat{S}_{xx}[k] = \frac{1}{T^2} |X_k|^2,
+\end{equation}
+which is simply the share of the total variance carried by the
+oscillation at frequency $\omega_k$. Summing these shares over all
+frequencies returns the variance in full; summing them over a subset of
+frequencies returns the part of the variance that lives in that band. The
+periodogram is therefore a budget: it tells the analyst exactly where the
+movement in a series comes from.
+
+This is the heart of the matter, and it can be stated without any
+equation at all. Given a return series, one may ask what fraction of its
+total variation arises from rapid fluctuations between consecutive
+observations and what fraction arises from slow movements unfolding over
+many months. The power spectrum answers precisely this question. It takes
+the total variance, the single quantity into which ordinary risk
+measurement collapses all variation, and distributes it across a range of
+timescales, showing how much of an asset's variability is attributable to
+fast dynamics and how much to slow.
+
+A few concrete shapes make the idea tangible. If a series were pure white
+noise, with no structure linking one observation to the next, its power
+would be spread evenly across all frequencies: the spectrum would be
+flat, and no timescale would carry more variance than any other. This is
+the benchmark against which real data is judged. A series dominated by
+slow trends, by contrast, concentrates its power at the low-frequency
+end: most of its variance comes from movements that take months or years
+to unfold, while the day-to-day variation is comparatively small. A
+series dominated by rapid reversals shows the opposite, with power piled
+up at the high-frequency end. The location of power along the frequency
+axis is thus a fingerprint of the dynamics of the series.
+
+The translation from frequency to calendar time is direct and is what
+makes the spectrum economically meaningful. A frequency $\omega_k$
+corresponds to a cycle that repeats every $T/k$ observations, so for
+daily data a given point on the frequency axis maps to a definite number
+of trading days. Power concentrated at cycles of a few days reflects the
+rapid, largely transitory fluctuations associated with market
+microstructure and short-term reversals. Power at cycles of weeks to
+months reflects the medium-term dynamics associated with fund flows,
+rebalancing, and momentum. Power at cycles of a year or more reflects the
+slow components associated with business cycles, monetary regimes, and
+secular trends. When an analyst inspects the power spectrum of a return
+series, they are reading off how the asset's risk is apportioned among
+these horizons, an apportionment that the single summary number of
+variance conceals entirely.
+
+This decomposition is the reason the frequency domain is the natural
+setting for the questions raised in Section~\ref{sec:introduction}. Two
+assets, or an asset and a benchmark, may carry the same total variance and
+yet distribute it across timescales in entirely different ways. An
+investor who cares about one horizon and not another is, in effect,
+interested in one region of the spectrum and indifferent to the rest. To
+make that preference precise, the variance must first be unpacked into its
+frequency components, which is exactly what the power spectrum provides.
+The next step is to extend the same decomposition from the variance of a
+single series to the covariance between two, since it is covariance with
+the benchmark that index tracking ultimately seeks to control.
+
+\subsubsection{The Cross-Spectrum and the Decomposition of Covariance}
+\label{sec:cross_spectrum}
+
+The same logic that splits the variance of one series across frequencies
+splits the covariance between two series in exactly the same way. This is
+the step that matters for index tracking, because tracking is
+fundamentally a statement about covariance: a portfolio replicates a
+benchmark when the two move together, and the quality of replication is
+governed by how their co-movement is distributed across timescales.
+
+Let $x_t$ and $y_t$ be two zero-mean series, for instance the returns of
+an asset and the returns of a benchmark, with Fourier coefficients $X_k$
+and $Y_k$. The sample covariance decomposes as
+\begin{equation}
+    \operatorname{cov}(x_t, y_t) = \frac{1}{T} \sum_{t=0}^{T-1} x_t y_t
+    = \frac{1}{T^2} \sum_{k=1}^{T-1} \Re[X_k \overline{Y_k}].
+\end{equation}
+Each term in this sum is the contribution that frequency $\omega_k$ makes
+to the total covariance. Define the cross-periodogram
+\begin{equation}
+    \hat{S}_{xy}[k] = \frac{1}{T^2} \Re[X_k \overline{Y_k}],
+\end{equation}
+so that the covariance is the sum of these frequency-specific
+contributions, and the covariance restricted to a band of frequencies
+$\mathcal{K}$ is simply the sum taken over that band. Just as the
+periodogram is a budget for variance, the cross-periodogram is a budget
+for covariance: it shows at which timescales two series move together and
+at which they do not.
+
+The crucial difference from the variance case is that the contributions
+can be negative. A frequency where the two series rise and fall together,
+in phase, contributes positively to the covariance. A frequency where one
+rises while the other falls, out of phase, contributes negatively. The
+total covariance is the net result of summing these signed contributions
+across all timescales. This is why two series can have low overall
+covariance for entirely different reasons: either they barely move
+together at any frequency, or they move together strongly at some
+frequencies and oppositely at others, with the contributions cancelling
+in the sum.
+
+Consider an asset that tracks a benchmark closely on a day-to-day basis
+but slowly drifts away from it over the course of years, perhaps because
+it belongs to a sector in secular decline. Its high-frequency co-movement
+with the benchmark is strongly positive: at the scale of days, the two
+are almost indistinguishable. Its low-frequency co-movement, however, is
+weak or even negative: at the scale of years, the asset and the benchmark
+part ways. The cross-periodogram of this pair would show large positive
+values at high frequencies and small or negative values at low
+frequencies. Now consider a second asset with the opposite profile: noisy
+and only loosely coupled to the benchmark from one day to the next, but
+firmly anchored to it over the long run, so that the two never wander far
+apart in level. This pair shows the reverse pattern, with weak
+high-frequency co-movement and strong positive low-frequency co-movement.
+
+These two assets pose entirely different propositions to an index
+tracker, and which one is preferable depends entirely on the investor's
+horizon. The first asset is an excellent daily tracker and a poor
+long-term one; the second is a poor daily tracker and an excellent
+long-term one. An ordinary covariance calculation, which sums across all
+frequencies and reports a single number, cannot distinguish between them
+in this way: it might even assign them similar total covariances with the
+benchmark while concealing that the covariance is generated at opposite
+ends of the spectrum. The cross-spectrum makes the distinction explicit,
+and in doing so makes it possible to select assets according to the
+timescale at which co-movement with the benchmark is actually required.
+
+This is the formal counterpart to the correlation and cointegration
+discussion of Section~\ref{sec:introduction}. The covariance of returns,
+on which the correlation paradigm is built, weights all frequencies of
+co-movement together, but because returns are differenced prices, that
+weighting is heavily tilted toward the high-frequency end, as the next
+section will make precise. Cointegration, by contrast, is a statement
+about co-movement at the very lowest frequencies, where the price levels
+of two integrated series remain tied together. The two paradigms are
+reading different entries in the same covariance budget. Once the budget
+is laid out frequency by frequency, the choice between them ceases to be
+a dichotomy and becomes a matter of selecting which entries to weight.
+
+\subsubsection{Linear Filters and the Reshaping of the Spectrum}
+\label{sec:filters}
+
+The decompositions established in the previous two sections characterise
+the frequency content of a series as given. It remains to introduce the
+mechanism by which that content may be modified, so that specific
+timescales can be emphasised and others suppressed. This is the function
+of the linear filter.
+
+A linear time-invariant filter transforms an input series $x_t$ into an
+output series $y_t$ through a weighted sum of past and present values,
+\begin{equation}
+    y_t = \sum_{\tau} h_\tau \, x_{t-\tau},
+\end{equation}
+where the sequence $\{h_\tau\}$ is the impulse response that
+characterises the filter. In the time domain this operation, a
+convolution, combines neighbouring observations and its effect is not
+readily apparent. In the frequency domain it admits a simple description.
+The convolution theorem states that filtering multiplies each Fourier
+coefficient by a complex factor that depends only on the frequency,
+\begin{equation}
+    Y_k = H(\omega_k) \, X_k, \qquad
+    H(\omega) = \sum_{\tau} h_\tau \, e^{-j\omega\tau},
+\end{equation}
+where $H(\omega)$ is the frequency response of the filter. The defining
+property is that the filter does not transfer energy between frequencies;
+it scales each frequency independently. The oscillation at frequency
+$\omega_k$ in the output is the corresponding oscillation in the input,
+multiplied by the single factor $H(\omega_k)$.
+
+The implication for the variance and covariance budgets is direct. Since
+each coefficient is scaled by $H(\omega_k)$, the periodogram of the
+output equals the periodogram of the input scaled by $|H(\omega_k)|^2$,
+and the cross-periodogram between two filtered series is scaled
+identically. Filtering therefore reweights the frequency-by-frequency
+contributions to variance and covariance, attenuating those timescales at
+which $|H(\omega)|$ is small and preserving those at which it approaches
+unity. The profile of $|H(\omega)|^2$ specifies exactly which timescales
+the filter retains and which it removes, so that the selection of a
+filter is equivalent to the selection of a weighting of the covariance
+budget.
+
+Two filters anchor the analysis that follows, and they occupy opposite
+ends of the spectrum. The first is the moving average, which replaces
+each observation by the mean of the surrounding $L$ values. Its frequency
+response is
+\begin{equation}
+    H_{\text{MA}}(\omega) = \frac{1}{L} \sum_{\tau=0}^{L-1} e^{-j\omega\tau},
+    \qquad
+    |H_{\text{MA}}(\omega)| = \frac{1}{L}\left|
+    \frac{\sin(\omega L / 2)}{\sin(\omega / 2)} \right|,
+\end{equation}
+which equals unity at zero frequency and decays toward zero as frequency
+increases, with the transition governed by the window length $L$. The
+moving average is accordingly a low-pass filter, passing slow movements
+and suppressing rapid ones, which formalises the sense in which smoothing
+removes short-term fluctuations. It follows that the covariance of two
+series each smoothed by a moving average equals the sum of the
+cross-spectrum over only the low frequencies the filter preserves.
+Smoothing the data prior to measuring covariance constitutes
+frequency-selective covariance estimation concentrated at long
+timescales.
+
+The second filter is the first difference, which replaces each
+observation by its change from the preceding period, $y_t = x_t -
+x_{t-1}$. Its frequency response is
+\begin{equation}
+    H_\Delta(\omega) = 1 - e^{-j\omega}, \qquad
+    |H_\Delta(\omega)| = 2\left|\sin\tfrac{\omega}{2}\right|,
+\end{equation}
+which vanishes at zero frequency and increases monotonically to its
+maximum at the highest frequency. Differencing is therefore a high-pass
+filter, removing slow movements and amplifying rapid ones, in direct
+contrast to the moving average. Measuring covariance on differenced data
+concentrates the estimate at short timescales.
+Figure~\ref{fig:filter_responses} plots the magnitude responses of the
+two filters on a common axis, making the low-pass and high-pass
+characters and their mirrored structure apparent.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.8\textwidth]{figures/filter_responses.pdf}
+\caption{Magnitude responses of the moving-average (low-pass) and
+first-difference (high-pass) filters as functions of angular frequency.
+The moving average preserves low frequencies and attenuates high ones,
+while the first difference does the reverse; the two are mirror images
+across the frequency band.}
+\label{fig:filter_responses}
+\end{figure}
+
+These two filters are not arbitrary illustrations but the operations that
+distinguish the two paradigms of Section~\ref{sec:introduction}.
+Correlation-based tracking operates on returns, which are differenced
+prices, and therefore measures co-movement through a high-pass filter
+that emphasises the shortest timescales. Cointegration-based tracking
+operates on price levels, which are the cumulative sum of returns and
+hence the output of the extreme low-pass filter represented by
+integration, and therefore measures co-movement at the lowest
+frequencies. The two paradigms constitute the same covariance budget
+viewed through opposite filters. Section~\ref{sec:freq_tracking} derives
+these frequency responses in full, establishes the timescales to which
+they correspond under daily sampling, and demonstrates that the range of
+filters between them yields a continuum of tracking criteria, each
+matched to a distinct investor horizon.
+
+\subsection{Time-Frequency Representations}
+\label{sec:tfr}
+
+\subsection{Index Tracking and Enhanced Index Tracking}
+\label{sec:it_formulation}
+
+\subsection{Coherent Risk Measures and Linear Programme Formulations}
+\label{sec:risk_measures}
+
+\subsection{Sparse Index Tracking}
+\label{sec:sparsity}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Frequency-Aware Index Tracking}
+\label{sec:freq_tracking}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{Frequency Response of the Differencing Operator}
+\label{sec:corr_response}
+
+\subsection{Frequency Response of the Integration Operator}
+\label{sec:coint_response}
+
+\subsection{The Fractional Differencing Family}
+\label{sec:frac_response}
+
+\subsection{Passband Representations and Investor Horizon Targeting}
+\label{sec:passband}
+\label{sec:general_freq}
+
+\subsection{Stationarity and the Need for Time-Frequency Representations}
+\label{sec:stationarity}
+
+\bibliographystyle{plainnat}
+
+\begin{thebibliography}{99}
+
+\bibitem[Artzner et al.(1999)]{ArtznerDelbaenEberHeath1999}
+Artzner, P., Delbaen, F., Eber, J.-M., and Heath, D. (1999).
+\newblock Coherent measures of risk.
+\newblock \emph{Mathematical Finance}, 9(3), 203--228.
+
+\bibitem[Benidis et al.(2018)]{BenidisFengPalomar2018}
+Benidis, K., Feng, Y., and Palomar, D.~P. (2018).
+\newblock Sparse portfolios for high-dimensional financial index tracking.
+\newblock \emph{IEEE Transactions on Signal Processing}, 66(1), 155--170.
+
+\bibitem[Alexander(1999)]{Alexander1999}
+Alexander, C. (1999).
+\newblock Optimal hedging using cointegration.
+\newblock \emph{Philosophical Transactions of the Royal Society of London,
+  Series A}, 357(1758), 2039--2058.
+
+\bibitem[Chaudhuri and Lo(2016)]{ChaudhuriLo2016}
+Chaudhuri, S.~E., and Lo, A.~W. (2016).
+\newblock Spectral portfolio theory.
+\newblock \emph{Working Paper}, MIT Laboratory for Financial Engineering.
+
+\bibitem[Engle(1974)]{EngleGranger1974}
+Engle, R.~F. (1974).
+\newblock Band spectrum regression.
+\newblock \emph{International Economic Review}, 15(1), 1--11.
+
+\bibitem[Euler(1738)]{Euler1738}
+Euler, L. (1738).
+\newblock De progressionibus transcendentibus seu quarum termini generales
+  algebraice dari nequeunt.
+\newblock \emph{Commentarii Academiae Scientiarum Petropolitanae}, 5,
+  36--57.
+
+\bibitem[Gencay et al.(2002)]{GencaySelcukWhitcher2002}
+Gen\c{c}ay, R., Sel\c{c}uk, F., and Whitcher, B. (2002).
+\newblock \emph{An Introduction to Wavelets and Other Filtering Methods in
+  Finance and Economics}.
+\newblock Academic Press, San Diego.
+
+\bibitem[Alexander and Dimitriu(2002)]{AlexanderDimitriu2002}
+Alexander, C., and Dimitriu, A. (2002).
+\newblock The cointegration alpha: Enhanced index tracking and long-short
+  equity market neutral strategies.
+\newblock \emph{ISMA Centre Discussion Papers in Finance}, 2002-08.
+\newblock University of Reading.
+
+\bibitem[Alexander and Dimitriu(2005a)]{AlexanderDimitriu2005a}
+Alexander, C., and Dimitriu, A. (2005a).
+\newblock Indexing and statistical arbitrage: Tracking error or cointegration?
+\newblock \emph{The Journal of Portfolio Management}, 31(2), 50--63.
+
+\bibitem[Alexander and Dimitriu(2005b)]{AlexanderDimitriu2005b}
+Alexander, C., and Dimitriu, A. (2005b).
+\newblock Indexing, cointegration and equity market regimes.
+\newblock \emph{International Journal of Finance and Economics}, 10(3),
+  213--231.
+
+\bibitem[Alexander et al.(2002)]{AlexanderGiblinWeddington2002}
+Alexander, C., Giblin, I., and Weddington, W. (2002).
+\newblock Cointegration and asset allocation: A new active hedge fund strategy.
+\newblock \emph{Research in International Business and Finance}, 16, 65--90.
+
+\bibitem[Arsov(2023)]{Arsov2023}
+Arsov, S. (2023).
+\newblock Cointegration across stock markets in South-East Europe and possible
+  spillovers.
+\newblock \emph{SSRN Working Paper}. Available at SSRN~4640959.
+
+\bibitem[Engle and Granger(1987)]{EngleGranger1987}
+Engle, R.~F., and Granger, C.~W.~J. (1987).
+\newblock Co-integration and error correction: Representation, estimation, and
+  testing.
+\newblock \emph{Econometrica}, 55(2), 251--276.
+
+\bibitem[Granger(1981)]{Granger1981}
+Granger, C.~W.~J. (1981).
+\newblock Some properties of time series data and their use in econometric
+  model specification.
+\newblock \emph{Journal of Econometrics}, 16(1), 121--130.
+
+\bibitem[Granger(1988)]{Granger1988}
+Granger, C.~W.~J. (1988).
+\newblock Some recent developments on a concept of causality.
+\newblock \emph{Journal of Econometrics}, 39(1--2), 199--211.
+
+\bibitem[Granger and Joyeux(1980)]{GrangerJoyeux1980}
+Granger, C.~W.~J., and Joyeux, R. (1980).
+\newblock An introduction to long memory time series models and fractional
+  differencing.
+\newblock \emph{Journal of Time Series Analysis}, 1(1), 15--29.
+
+\bibitem[Grobys(2010)]{Grobys2010}
+Grobys, K. (2010).
+\newblock Correlation versus cointegration: Do cointegration based index
+  tracking portfolios perform better? Evidence from the Swedish stock market.
+\newblock \emph{German Journal for Young Researchers}, 2(1), 72--78.
+
+\bibitem[Hosking(1981)]{Hosking1981}
+Hosking, J.~R.~M. (1981).
+\newblock Fractional differencing.
+\newblock \emph{Biometrika}, 68(1), 165--176.
+
+\bibitem[Johansen(1988)]{Johansen1988}
+Johansen, S. (1988).
+\newblock Statistical analysis of cointegration vectors.
+\newblock \emph{Journal of Economic Dynamics and Control}, 12(2--3), 231--254.
+
+\bibitem[Johansen(1991)]{Johansen1991}
+Johansen, S. (1991).
+\newblock Estimation and hypothesis testing of cointegration vectors in
+  Gaussian vector autoregressive models.
+\newblock \emph{Econometrica}, 59(6), 1551--1581.
+
+\bibitem[Markowitz(1959)]{Markowitz1959}
+Markowitz, H. (1959).
+\newblock \emph{Portfolio Selection: Efficient Diversification of Investments}.
+\newblock John Wiley and Sons, New York.
+
+\bibitem[Miao(2014)]{Miao2014}
+Miao, G.~J. (2014).
+\newblock High frequency and dynamic pairs trading based on statistical
+  arbitrage using a two-stage correlation and cointegration approach.
+\newblock \emph{International Journal of Economics and Finance}, 6(3), 96--110.
+
+\bibitem[Roll(1992)]{Roll1992}
+Roll, R. (1992).
+\newblock A mean/variance analysis of tracking error.
+\newblock \emph{The Journal of Portfolio Management}, 18(4), 13--22.
+
+\bibitem[Sant'Anna et al.(2016)]{SantAnna2016}
+Sant'Anna, L.~R., Filomena, T.~P., and Caldeira, J.~F. (2016).
+\newblock Index tracking and enhanced indexing using cointegration and
+  correlation with endogenous portfolio selection.
+\newblock \emph{The Quarterly Review of Economics and Finance}, 65, 146--157.
+
+\end{thebibliography}
+
+\end{document}
