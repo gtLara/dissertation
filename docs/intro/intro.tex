@@ -129,7 +129,7 @@ follows mathematically from working with return series, which are first
 differences of prices: differencing acts as a high-pass filter,
 suppressing low-frequency trends and retaining only rapid fluctuations
 \citep{ChaudhuriLo2016,EngleGranger1974}.
-Section~\ref{sec:frequency_analysis}
+Section~\ref{sec:corr_response}
 makes this precise and quantifies the effective horizon of
 correlation-based tracking. In the absence of a mean-reversion
 mechanism, the tracking error may behave as a random walk, drifting
@@ -158,7 +158,7 @@ horizons shorter than a year. This long-run character is the structural
 counterpart to correlation's short-run sensitivity: working in price
 levels, which are the cumulative sum of returns, acts as a low-pass
 filter, suppressing rapid fluctuations and retaining only slow-moving
-common trends \citep{ChaudhuriLo2016}. Section~\ref{sec:frequency_analysis} quantifies this
+common trends \citep{ChaudhuriLo2016}. Section~\ref{sec:coint_response} quantifies this
 precisely. A direct consequence is that cointegration-based portfolios
 require less frequent rebalancing than their correlation-based
 counterparts. The cause is structural: the objective is itself
@@ -276,7 +276,7 @@ as $d$ decreases from one toward zero. Correlation corresponds to
 $d = 1$; cointegration corresponds to $d \approx 0$; and every
 investment horizon in between corresponds to some intermediate value.
 Section~\ref{sec:fractional_integration} develops this connection
-formally, and Section~\ref{sec:frequency_analysis} makes the horizon
+formally, and Section~\ref{sec:frac_response} makes the horizon
 mapping precise.
 
 \subsection{A False Dichotomy}
@@ -799,8 +799,190 @@ matched to a distinct investor horizon.
 \subsection{Time-Frequency Representations}
 \label{sec:tfr}
 
+\subsection{Value Process}
+\label{sec:value_process}
+
+\subsubsection{The Price Process}
+\label{sec:price_process}
+
+The analysis so far has treated the price process as integrated of order
+one without specifying a data-generating process or establishing the
+property. This subsection states the assumption explicitly and identifies
+the transformation under which it holds.
+
+Let $P_t$ denote the price of an asset at time $t$. The price is modelled
+as a geometric Brownian motion,
+\begin{equation}
+    dP_t = \mu P_t \, dt + \sigma P_t \, dW_t,
+\end{equation}
+with drift $\mu$, volatility $\sigma > 0$, and $W_t$ a standard Wiener
+process. This is the continuous-time process underlying much of modern
+asset pricing \citep{Osborne1959, Samuelson1965, BlackScholes1973}, and
+its discrete sampling is the standard random-walk representation of daily
+prices \citep{Fama1965}. It is adopted here as a modelling idealisation
+that fixes the second-order and integration structure of the process; it
+is not an estimation assumption, and the estimators developed in the later
+sections are non-parametric. Daily returns depart from the model in ways
+it does not capture, in particular heavy tails and volatility clustering
+\citep{Mandelbrot1963, Cont2001}. These departures concern the
+distributional tails rather than the order of integration, and are taken
+up where they bear on the analysis.
+
+The multiplicative diffusion term has an immediate consequence. The
+variance of a price increment scales with the price level, so the
+increments are heteroscedastic and the raw series admits no finite integer
+order of differencing that returns a stationary process. The price level
+therefore has no well-defined order of integration.
+
+The logarithmic transformation removes this dependence. With
+$p_t = \log P_t$, Itô's lemma gives
+\begin{equation}
+    dp_t = \left( \mu - \tfrac{1}{2}\sigma^2 \right) dt + \sigma \, dW_t,
+\end{equation}
+so the log-price follows an arithmetic Brownian motion with constant drift
+and constant diffusion coefficient. Its increments, the log-returns, are
+stationary, and the log-price is a random walk with drift, hence
+integrated of order one. The transformation serves two ends at once: it
+stabilises the variance by removing the multiplicative dependence on the
+level, and it endows the price process with a well-defined unit-root
+structure.
+
+The latter is the substantive gain. An order of integration is defined
+only once the series is expressed in logarithms, and this integer
+benchmark is what the fractional differencing of
+Section~\ref{sec:fractional_integration} interpolates and what the
+tracking analysis of Section~\ref{sec:freq_tracking} builds upon. The
+value process and its tracking quantity, developed in the remainder of
+this section, are expressed throughout in log-prices and log-returns.
+
+\subsubsection{Benchmark and Replica Values}
+\label{sec:value_objects}
+
+Section~\ref{sec:price_process} established the price process for a single
+asset. Index tracking concerns a universe of $N$ assets whose constituent
+prices are $P_{1,t},\dots,P_{N,t}$, with log-prices
+$p_{i,t}=\log P_{i,t}$, each integrated of order one.
+
+The problem compares two value processes. The benchmark is the index, with
+value process $V_t^b$, and the replica is a portfolio with weights
+$\mathbf{w}=(w_1,\dots,w_N)^\top$ and value process $V_t$. So that their
+performance is compared on equal terms, both are initialised at a common
+value,
+\begin{equation}
+    V_0 = V_0^b,
+\end{equation}
+and any subsequent divergence is then attributable to tracking error
+rather than to a difference in scale \citep{BenidisFengPalomar2018}.
+
+The quantity of interest is the discrepancy between the two value
+processes. Expressed in logarithms, it is the log-value gap
+\begin{equation}
+    e_t = \log V_t^b - \log V_t,
+\end{equation}
+the tracking error measured at the level of accumulated value. Subject to
+the aggregation approximation of Section~\ref{sec:aggregation}, the
+benchmark and replica log-values are fixed linear combinations of
+constituent log-prices, so that $e_t$ is itself a linear combination of
+series that are individually integrated of order one. Tracking is the
+requirement that $e_t$ be controlled; the two paradigms of
+Section~\ref{sec:introduction} differ in the sense in which that control
+is imposed, which the next subsection makes precise.
+
+\subsubsection{The Tracking Residual and Its Accumulation}
+\label{sec:residual_accumulation}
+
+The log-value gap admits a decomposition that exposes the structure of the
+two paradigms. Let $r_{i,t}=\Delta p_{i,t}$ denote the log-return of asset
+$i$, collected in the vector $\mathbf{r}_t$, and let $r_t^b$ denote the
+log-return of the benchmark. Define the per-period residual
+\begin{equation}
+    \epsilon_t = r_t^b - \mathbf{w}^\top \mathbf{r}_t,
+\end{equation}
+the difference between the benchmark and replica log-returns on day $t$.
+Because the log-value of each process is the running sum of its
+log-returns, the log-value gap is the accumulation of this residual,
+\begin{equation}
+    e_t = e_0 + \sum_{i=1}^{t}\epsilon_i, \qquad \Delta e_t = \epsilon_t.
+\end{equation}
+The level gap is therefore the discrete integral of the per-period
+residual.
+
+This identity separates two notions of tracking. Return-based tracking,
+associated with the correlation paradigm, controls the increment
+$\epsilon_t$, typically by minimising its variance. Price-based tracking,
+associated with the cointegration paradigm, controls the level $e_t$
+directly, requiring it to be stationary.
+
+The distinction has a decisive consequence. Suppose the increment
+$\epsilon_t$ is rendered stationary with zero mean, as return-based
+tracking intends. Its partial sum $e_t=\sum_{i\le t}\epsilon_i$ is then
+integrated of order one: a random walk whose variance grows linearly in
+$t$ and which drifts without bound, acquiring a deterministic trend
+whenever $\mathbb{E}[\epsilon_t]\neq 0$. Controlling the increment thus
+leaves the accumulated level gap unbounded, which is the mechanism behind
+the observation of \citet{Alexander1999} that correlation-based tracking
+offers no guarantee that replica and benchmark remain close in value.
+Cointegration-based tracking constrains $e_t$ itself, which is stationary
+precisely when the constituent log-prices are cointegrated.
+
+The accumulation $e_t=\sum_{i\le t}\epsilon_i$ is the action of the
+integration operator, whose frequency response $1/(1-e^{-j\omega})$
+diverges as $\omega\to 0$. The unbounded drift is thus low-frequency
+content of the residual that return-based tracking leaves uncontrolled.
+Section~\ref{sec:general_freq} develops a filtered criterion that treats
+this content frequency by frequency, recovering the two paradigms as its
+limiting cases.
+
+\subsubsection{Cross-Sectional Aggregation}
+\label{sec:aggregation}
+
+The preceding two subsections treat the log-value of a portfolio as a
+linear combination of constituent log-prices. This is an approximation,
+and its scope must be stated.
+
+A portfolio value is linear in prices, not in log-prices. Collecting the
+constituent prices in $\mathbf{P}_t$, the portfolio value involves
+$\log(\mathbf{w}^\top\mathbf{P}_t)$, whereas the linear combination used
+above is $\mathbf{w}^\top\log\mathbf{P}_t$, and the two are not equal,
+\begin{equation}
+    \log\!\left(\mathbf{w}^\top\mathbf{P}_t\right)
+    \neq \mathbf{w}^\top\log\mathbf{P}_t.
+\end{equation}
+Equivalently, the log-return of a portfolio is not the weighted sum of its
+constituent log-returns. The developments above rely on the approximation
+\begin{equation}
+    \log\!\left(\mathbf{w}^\top\mathbf{P}_t\right)
+    \approx \mathbf{w}^\top\log\mathbf{P}_t,
+\end{equation}
+under which the log-value gap is a linear combination of log-prices and the
+residual is $\epsilon_t=r_t^b-\mathbf{w}^\top\mathbf{r}_t$
+\citep{BenidisFengPalomar2018}.
+
+The error of this approximation is of second order in the cross-sectional
+dispersion of returns and is small at the magnitudes characteristic of
+daily data; it is the standard working assumption in cointegration-based
+tracking \citep{AlexanderDimitriu2002}. The distinction between returns,
+which aggregate across assets, and log-returns, which accumulate across
+time, is treated in full by \citet{Meucci2010}; the present work adopts
+log-values throughout and does not develop the mapping between the two.
+
+% NOTE: The regime-dependence of this approximation (tight when tracking
+% succeeds; more delicate for enhanced tracking, where a positive value gap
+% is sought by construction) is deferred to sec:it_formulation, since it
+% depends on the index tracking and enhanced index tracking problems, which
+% are not yet defined at this point.
+
 \subsection{Index Tracking and Enhanced Index Tracking}
 \label{sec:it_formulation}
+
+% NOTE: When defining the index tracking and enhanced index tracking
+% problems, take up how the cross-sectional aggregation approximation of
+% sec:aggregation behaves. Its error grows with the cross-sectional
+% dispersion between replica and benchmark, so it is tightest exactly when
+% tracking succeeds. For enhanced tracking it remains controlled when the
+% enhancement enters as a deterministic drift in log-value, but degrades
+% with the magnitude of the enhancement when positive residuals are pursued
+% through a wider stochastic band.
 
 \subsection{Coherent Risk Measures and Linear Programme Formulations}
 \label{sec:risk_measures}
@@ -813,6 +995,9 @@ matched to a distinct investor horizon.
 \label{sec:freq_tracking}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+\subsection{The Filtered Tracking Criterion}
+\label{sec:general_freq}
+
 \subsection{Frequency Response of the Differencing Operator}
 \label{sec:corr_response}
 
@@ -824,7 +1009,6 @@ matched to a distinct investor horizon.
 
 \subsection{Passband Representations and Investor Horizon Targeting}
 \label{sec:passband}
-\label{sec:general_freq}
 
 \subsection{Stationarity and the Need for Time-Frequency Representations}
 \label{sec:stationarity}
@@ -967,6 +1151,43 @@ Sant'Anna, L.~R., Filomena, T.~P., and Caldeira, J.~F. (2016).
 \newblock Index tracking and enhanced indexing using cointegration and
   correlation with endogenous portfolio selection.
 \newblock \emph{The Quarterly Review of Economics and Finance}, 65, 146--157.
+
+\bibitem[Black and Scholes(1973)]{BlackScholes1973}
+Black, F. and Scholes, M. (1973).
+\newblock The pricing of options and corporate liabilities.
+\newblock \emph{Journal of Political Economy}, 81(3), 637--654.
+
+\bibitem[Cont(2001)]{Cont2001}
+Cont, R. (2001).
+\newblock Empirical properties of asset returns: stylized facts and
+  statistical issues.
+\newblock \emph{Quantitative Finance}, 1(2), 223--236.
+
+\bibitem[Fama(1965)]{Fama1965}
+Fama, E.~F. (1965).
+\newblock The behavior of stock-market prices.
+\newblock \emph{The Journal of Business}, 38(1), 34--105.
+
+\bibitem[Mandelbrot(1963)]{Mandelbrot1963}
+Mandelbrot, B. (1963).
+\newblock The variation of certain speculative prices.
+\newblock \emph{The Journal of Business}, 36(4), 394--419.
+
+\bibitem[Meucci(2010)]{Meucci2010}
+Meucci, A. (2010).
+\newblock Quant nugget 2: Linear vs.\ compounded returns -- common pitfalls
+  in portfolio management.
+\newblock \emph{GARP Risk Professional}, April 2010.
+
+\bibitem[Osborne(1959)]{Osborne1959}
+Osborne, M.~F.~M. (1959).
+\newblock Brownian motion in the stock market.
+\newblock \emph{Operations Research}, 7(2), 145--173.
+
+\bibitem[Samuelson(1965)]{Samuelson1965}
+Samuelson, P.~A. (1965).
+\newblock Rational theory of warrant pricing.
+\newblock \emph{Industrial Management Review}, 6(2), 13--39.
 
 \end{thebibliography}
 
