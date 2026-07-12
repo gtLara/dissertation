@@ -125,10 +125,10 @@ will remain bounded over time. For daily data, this short-run character
 is pronounced: the tracking objective is primarily sensitive to
 fluctuations at horizons of days to weeks, and is essentially blind to
 slower-moving divergences between the portfolio and the benchmark. This
-is not an empirical accident but a mathematical consequence of working
-with return series, which are first differences of prices: differencing
-acts as a high-pass filter, suppressing low-frequency trends and
-retaining only rapid fluctuations \citep{ChaudhuriLo2016,EngleGranger1974}.
+follows mathematically from working with return series, which are first
+differences of prices: differencing acts as a high-pass filter,
+suppressing low-frequency trends and retaining only rapid fluctuations
+\citep{ChaudhuriLo2016,EngleGranger1974}.
 Section~\ref{sec:frequency_analysis}
 makes this precise and quantifies the effective horizon of
 correlation-based tracking. In the absence of a mean-reversion
@@ -161,9 +161,9 @@ filter, suppressing rapid fluctuations and retaining only slow-moving
 common trends \citep{ChaudhuriLo2016}. Section~\ref{sec:frequency_analysis} quantifies this
 precisely. A direct consequence is that cointegration-based portfolios
 require less frequent rebalancing than their correlation-based
-counterparts, not as a practical convenience but because the objective
-itself is insensitive to the short-run deviations that would otherwise
-trigger rebalancing.
+counterparts. This reflects not practical convenience but the
+insensitivity of the objective itself to the short-run deviations that
+would otherwise trigger rebalancing.
 
 These theoretical properties were subsequently developed into explicit
 trading strategies by \citet{AlexanderGiblinWeddington2002} and
@@ -242,8 +242,8 @@ directly affect the hedge's effectiveness and need to be kept small.
 Multi-year drift is irrelevant: positions are rarely held beyond a few
 months. For this investor, correlation-based tracking is the natural
 choice. The tracking objective is sensitive to exactly the fluctuations
-that matter, and frequent rebalancing is not a cost to be minimised but
-a feature of the strategy.
+that matter, and frequent rebalancing is part of how the strategy
+operates rather than a cost to be avoided.
 
 The second is an asset manager running the equity sleeve of a defined
 benefit pension fund, matching assets to liabilities that extend twenty
@@ -281,8 +281,8 @@ mapping precise.
 
 \subsection{A False Dichotomy}
 
-What emerges from this body of work is not a resolved debate but an
-incompletely specified one. The studies reviewed above have largely asked
+What emerges from this body of work is an open and incompletely specified
+debate. The studies reviewed above have largely asked
 which method is better, without first specifying better for whom and over
 what horizon. As the two investor examples in the previous section
 illustrate, this question has no horizon-independent answer: correlation
@@ -690,9 +690,7 @@ weighting is heavily tilted toward the high-frequency end, as the next
 section will make precise. Cointegration, by contrast, is a statement
 about co-movement at the very lowest frequencies, where the price levels
 of two integrated series remain tied together. The two paradigms are
-reading different entries in the same covariance budget. Once the budget
-is laid out frequency by frequency, the choice between them ceases to be
-a dichotomy and becomes a matter of selecting which entries to weight.
+therefore reading different entries in the same covariance budget.
 
 \subsubsection{Linear Filters and the Reshaping of the Spectrum}
 \label{sec:filters}
@@ -784,8 +782,9 @@ across the frequency band.}
 \label{fig:filter_responses}
 \end{figure}
 
-These two filters are not arbitrary illustrations but the operations that
-distinguish the two paradigms of Section~\ref{sec:introduction}.
+These two filters serve as more than illustrations: they are the
+operations that distinguish the two paradigms of
+Section~\ref{sec:introduction}.
 Correlation-based tracking operates on returns, which are differenced
 prices, and therefore measures co-movement through a high-pass filter
 that emphasises the shortest timescales. Cointegration-based tracking
