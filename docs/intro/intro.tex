@@ -161,9 +161,9 @@ filter, suppressing rapid fluctuations and retaining only slow-moving
 common trends \citep{ChaudhuriLo2016}. Section~\ref{sec:frequency_analysis} quantifies this
 precisely. A direct consequence is that cointegration-based portfolios
 require less frequent rebalancing than their correlation-based
-counterparts. This reflects not practical convenience but the
-insensitivity of the objective itself to the short-run deviations that
-would otherwise trigger rebalancing.
+counterparts. The cause is structural: the objective is itself
+insensitive to the short-run deviations that would otherwise trigger
+rebalancing.
 
 These theoretical properties were subsequently developed into explicit
 trading strategies by \citet{AlexanderGiblinWeddington2002} and
@@ -308,16 +308,15 @@ investor sits squarely between the two extremes, and the binary framing
 offers no natural home for them. The dichotomy is therefore a second and
 separate limitation, compounding the primary one.
 
-Correlation and cointegration are not competing definitions of dependence
-so much as limiting cases of a richer structure. Correlation, by
+Correlation and cointegration are two limiting cases of a single, richer
+structure. Correlation, by
 operating on returns, is sensitive to high-frequency co-movements while
 being blind to low-frequency common trends. Cointegration, by identifying
 stochastic trends in price levels, is precisely a statement about the
 very lowest frequencies of the data generating process: the near-zero
 portion of the spectrum where power accumulates without bound in an
-integrated series. The two approaches are therefore not in opposition;
-they are each sampling a different part of the spectral content of the
-multivariate price process.
+integrated series. The two approaches therefore sample different parts of
+the spectral content of the multivariate price process.
 
 This observation connects naturally to the theory of fractional
 integration. A series that is $I(0)$ is stationary and its spectral
@@ -782,9 +781,8 @@ across the frequency band.}
 \label{fig:filter_responses}
 \end{figure}
 
-These two filters serve as more than illustrations: they are the
-operations that distinguish the two paradigms of
-Section~\ref{sec:introduction}.
+These two filters are the operations that distinguish the two paradigms
+of Section~\ref{sec:introduction}.
 Correlation-based tracking operates on returns, which are differenced
 prices, and therefore measures co-movement through a high-pass filter
 that emphasises the shortest timescales. Cointegration-based tracking
